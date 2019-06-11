@@ -22,12 +22,15 @@ public class MyCashe extends LinkedHashMap {
     @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
         if (size() > MAX_SIZE) {
+            File file = null;
             try {
-                File file = File.createTempFile(String.valueOf(eldest.getKey()), "_temp");
-                OutputStream os = new FileOutputStream(file);
-                os.write((byte[]) eldest.getValue());
-                os.flush();
-                os.close();
+                file = File.createTempFile("MyCashe_" + eldest.getKey(), "_temp");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try (OutputStream outputStream = new FileOutputStream(file)) {
+                outputStream.write((byte[]) eldest.getValue());
+                outputStream.flush();
                 registry.put((UUID) eldest.getKey(), file.getAbsolutePath());
             } catch (IOException e) {
                 System.err.println("Cant create file: " + eldest.getKey());
@@ -57,7 +60,9 @@ public class MyCashe extends LinkedHashMap {
                 Path path = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource(registry.get(key))).toURI());
                 result = Files.readAllBytes(path);
                 registry.remove(key);
+                super.remove(key);
                 super.put(key, result);
+                new File(path.toUri()).delete();
             } catch (URISyntaxException | IOException e) {
                 e.printStackTrace();
             }

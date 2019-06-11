@@ -5,8 +5,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class MyCasheTest {
 
@@ -19,6 +22,11 @@ public class MyCasheTest {
 
     @After
     public void tearDown() throws Exception {
+        Arrays.stream(new File(System.getProperty("java.io.tmpdir"))
+                .listFiles())
+                .filter(o -> o.getName().contains("MyCashe_"))
+                .collect(Collectors.toList())
+                .forEach(o -> o.getAbsoluteFile().delete());
     }
 
     @Test
