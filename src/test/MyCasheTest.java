@@ -5,15 +5,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 public class MyCasheTest {
 
-    MyCashe myCashe;
+    LinkedHashMap myCashe;
 
     @Before
     public void setUp() throws Exception {
-        myCashe = new MyCashe();
+        myCashe = new MyCashe(5);
     }
 
     @After
@@ -22,10 +23,11 @@ public class MyCasheTest {
 
     @Test
     public void test() {
-        for (int i =0; i<10; i++) {
+        for (int i = 0; i < 11; i++) {
             byte[] bytes = new byte[20];
             new Random().nextBytes(bytes);
-            myCashe.put(bytes);
+            myCashe.put(null, bytes);
         }
+        System.out.println();
     }
 }
