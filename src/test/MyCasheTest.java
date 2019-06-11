@@ -5,9 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.UUID;
-
-import static org.junit.Assert.*;
+import java.util.Random;
 
 public class MyCasheTest {
 
@@ -25,8 +23,9 @@ public class MyCasheTest {
     @Test
     public void test() {
         for (int i =0; i<10; i++) {
-
-            myCashe.put(UUID.randomUUID());
+            byte[] bytes = new byte[20];
+            new Random().nextBytes(bytes);
+            myCashe.put(bytes);
         }
     }
 }
