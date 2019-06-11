@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class MyCashe extends LinkedHashMap {
-
     private static int MAX_SIZE = 0;
-    List<Object> registry = new ArrayList<>();
+    Map<UUID, String> registry = new HashMap<>();
 
     public MyCashe(int initialCapacity) {
         super(initialCapacity);
@@ -19,13 +22,13 @@ public class MyCashe extends LinkedHashMap {
     @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
         if (size() > MAX_SIZE) {
-            registry.add(eldest.getKey());
             try {
                 File file = File.createTempFile(String.valueOf(eldest.getKey()), "_temp");
                 OutputStream os = new FileOutputStream(file);
                 os.write((byte[]) eldest.getValue());
                 os.flush();
                 os.close();
+                registry.put((UUID) eldest.getKey(), file.getAbsolutePath());
             } catch (IOException e) {
                 System.err.println("Cant create file: " + eldest.getKey());
                 e.printStackTrace();
@@ -46,6 +49,19 @@ public class MyCashe extends LinkedHashMap {
 
     @Override
     public Object get(Object key) {
-        return super.get(key);
+        Object result = null;
+        if (containsKey(key)) {
+            result = super.get(key);
+        } else {
+            try {
+                Path path = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource(registry.get(key))).toURI());
+                result = Files.readAllBytes(path);
+                registry.remove(key);
+                super.put(key, result);
+            } catch (URISyntaxException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 }
