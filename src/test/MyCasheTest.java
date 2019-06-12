@@ -1,41 +1,54 @@
 package test;
 
+import jdk.nashorn.internal.runtime.logging.Logger;
 import main.MyCashe;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Logger
 public class MyCasheTest {
 
-    LinkedHashMap myCashe;
+    HashMap myCashe;
 
     @Before
     public void setUp() throws Exception {
         myCashe = new MyCashe(5);
     }
 
+    List<UUID> list = new ArrayList<>();
+
     @After
     public void tearDown() throws Exception {
-        Arrays.stream(new File(System.getProperty("java.io.tmpdir"))
-                .listFiles())
-                .filter(o -> o.getName().contains("MyCashe_"))
-                .collect(Collectors.toList())
+        Arrays.stream(new File(System.getProperty("java.io.tmpdir")).listFiles())
+                .filter(o -> o.getName().contains("MyCashe_")).collect(Collectors.toList())
                 .forEach(o -> o.getAbsoluteFile().delete());
     }
 
     @Test
     public void test() {
-        for (int i = 0; i < 11; i++) {
+        addRandomData(7);
+        Object o1 = myCashe.get(list.get(2));
+        Object o2 = myCashe.get(list.get(0));
+        Object o3 = myCashe.get(list.get(6));
+        addRandomData(4);
+        Object o4 = myCashe.get(list.get(6));
+        Object o5 = myCashe.get(list.get(4));
+
+        System.out.printf("");
+    }
+
+    private void addRandomData(int count) {
+        for (int i = 0; i < count; i++) {
             byte[] bytes = new byte[20];
             new Random().nextBytes(bytes);
-            myCashe.put(null, bytes);
+            UUID uuid = UUID.randomUUID();
+            list.add(uuid);
+            myCashe.put(uuid, bytes);
         }
-        System.out.println();
     }
 }
