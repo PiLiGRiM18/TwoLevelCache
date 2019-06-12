@@ -81,6 +81,7 @@ public class MyCashe extends LinkedHashMap {
             e.printStackTrace();
         }
         try (OutputStream outputStream = new FileOutputStream(file)) {
+            // TODO: 12.06.2019  https://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
             outputStream.write((byte[]) eldest.getValue());
             outputStream.flush();
             System.out.println(String.format("The file has been dumped on disk: %s", file.getAbsolutePath()));

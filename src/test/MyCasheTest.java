@@ -13,11 +13,12 @@ import java.util.stream.Collectors;
 @Logger
 public class MyCasheTest {
 
-    HashMap myCashe;
+    private final int CAPACITY = 5;
+    private HashMap myCashe;
 
     @Before
     public void setUp() throws Exception {
-        myCashe = new MyCashe(5);
+        myCashe = new MyCashe(CAPACITY);
     }
 
     List<UUID> list = new ArrayList<>();
@@ -31,6 +32,7 @@ public class MyCasheTest {
 
     @Test
     public void test() {
+        myCashe.put("asd", "zxc");
         addRandomData(7);
         Object o1 = myCashe.get(list.get(2));
         Object o2 = myCashe.get(list.get(0));
@@ -38,6 +40,8 @@ public class MyCasheTest {
         addRandomData(4);
         Object o4 = myCashe.get(list.get(6));
         Object o5 = myCashe.get(list.get(4));
+
+//String s = (String) myCashe.get("asd");
 
         System.out.printf("");
     }
