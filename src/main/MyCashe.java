@@ -7,14 +7,13 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MyCashe extends LinkedHashMap {
     private static int MAX_SIZE = 0;
 
-    private Map<CasheItem, Path> registry = new HashMap<>();
+//    private Map<CasheItem, Path> registry = new HashMap<>();
 //    private Map<Object, Integer> frequency = new HashMap<>();
 
     public MyCashe(int initialCapacity) {
@@ -43,16 +42,16 @@ public class MyCashe extends LinkedHashMap {
     @Override
     public Object get(Object key) {
         CasheItem result = null;
-        if (!containsKey(key) && !registry.keySet().contains(key)) {
+        if (!containsKey(key)) {
             System.err.println(String.format("There is no key %s in the cache!", key));
         }
         if (containsKey(key)) {
             result = (CasheItem) super.get(key);
         } else {
             try {
-                Path path = registry.get(key);
+                Path path = ((CasheItem) super.get(key)).getPath();
                 result = Files.readAllBytes(path);
-                registry.remove(key);
+
                 super.remove(key);
                 super.put(key, result);
                 new File(path.toUri()).delete();
@@ -61,7 +60,6 @@ public class MyCashe extends LinkedHashMap {
             }
         }
         result.incrementFrequency();
-        frequency.replace(key, frequency.get(key) + 1);
         return result;
     }
 
