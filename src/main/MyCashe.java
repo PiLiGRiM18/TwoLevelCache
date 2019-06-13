@@ -10,23 +10,27 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MyCashe extends LinkedHashMap {
-    private static int MAX_SIZE = 0;
+    private static int CAPACITY;
 
     private Map<Object, Path> registry = new HashMap<>();
     private Map<Object, Integer> frequency = new HashMap<>();
 
+    private static Logger LOGGER = Logger.getAnonymousLogger();
+
     public MyCashe(int initialCapacity) {
         super(initialCapacity);
-        MAX_SIZE = initialCapacity;
+        CAPACITY = initialCapacity;
     }
 
     @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
-        if (size() > MAX_SIZE && checkFrequency(eldest)) {
+        if (size() > CAPACITY && checkFrequency(eldest)) {
             dump(eldest);
-            return size() > MAX_SIZE;
+            return size() > CAPACITY;
         }
         return super.removeEldestEntry(eldest);
     }
@@ -45,7 +49,7 @@ public class MyCashe extends LinkedHashMap {
     public Object get(Object key) {
         Object result = null;
         if (!containsKey(key) && !registry.keySet().contains(key)) {
-            System.err.println(String.format("There is no key %s in the cache!", key));
+            LOGGER.log(Level.SEVERE, String.format("There is no key %s in the cache!", key));
         }
         if (containsKey(key)) {
             result = super.get(key);
@@ -56,9 +60,9 @@ public class MyCashe extends LinkedHashMap {
                 registry.remove(key);
                 super.remove(key);
                 super.put(key, result);
-                new File(path.toUri()).delete();
+                Files.delete(path);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Can't get file: " + key, e);
             }
         }
         frequency.replace(key, frequency.get(key) + 1);
@@ -78,17 +82,16 @@ public class MyCashe extends LinkedHashMap {
         try {
             file = File.createTempFile("MyCashe_" + eldest.getKey(), "_temp");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Can't create temp file: MyCashe_" + eldest.getKey() + "_temp", e);
         }
         try (OutputStream outputStream = new FileOutputStream(file)) {
-            // TODO: 12.06.2019  https://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
+            // T ODO: 12.06.2019  https://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
             outputStream.write((byte[]) eldest.getValue());
             outputStream.flush();
-            System.out.println(String.format("The file has been dumped on disk: %s", file.getAbsolutePath()));
+            LOGGER.log(Level.INFO, "The file has been dumped on disk: " + file.getAbsolutePath());
             registry.put(eldest.getKey(), Paths.get(file.getAbsolutePath()));
         } catch (IOException e) {
-            System.err.println("Cant create file: " + eldest.getKey());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Cant create file: " + eldest.getKey(), e);
         }
         remove(eldest.getKey());
     }
