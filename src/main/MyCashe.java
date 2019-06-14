@@ -59,7 +59,7 @@ public class MyCashe extends LinkedHashMap {
                 Path path = registry.get(key).getValue();
                 result = Files.readAllBytes(path);
                 super.remove(key);
-//                super.put(key, result);
+                super.put(key, result);
                 Files.delete(path);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Can't get file: " + key, e);
@@ -74,7 +74,7 @@ public class MyCashe extends LinkedHashMap {
                 .collect(Collectors.toList())
                 .stream().sorted(Comparator.reverseOrder())
                 .collect(Collectors.toList());
-        return registry.size() < CAPACITY || (registry.get(eldest.getKey())).getKey() <= list.get(CAPACITY);
+        return registry.size() < CAPACITY && (registry.get(eldest.getKey())).getKey() <= list.get(CAPACITY);
     }
 
     private void dump(Map.Entry eldest) {
