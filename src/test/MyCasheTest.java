@@ -8,31 +8,37 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Logger
 public class MyCasheTest {
+    private static java.util.logging.Logger LOGGER;
 
     private final int CAPACITY = 5;
+    List<UUID> list = new ArrayList<>();
     private HashMap myCashe;
 
     @Before
     public void setUp() throws Exception {
+        LOGGER = java.util.logging.Logger.getAnonymousLogger();
         myCashe = new MyCashe(CAPACITY);
     }
-
-    List<UUID> list = new ArrayList<>();
 
     @After
     public void tearDown() throws Exception {
         Arrays.stream(new File(System.getProperty("java.io.tmpdir")).listFiles())
-                .filter(o -> o.getName().contains("MyCashe_")).collect(Collectors.toList())
-                .forEach(o -> o.getAbsoluteFile().delete());
+                .filter(o -> o.getName().contains("my-cashe")).collect(Collectors.toList())
+                .forEach(o -> {
+                    File file = o.getAbsoluteFile();
+                    LOGGER.log(Level.INFO, "Delete file: " + file);
+                    file.delete();
+                });
     }
 
     @Test
     public void test() {
-        myCashe.put("asd", "zxc");
+//        myCashe.put("asd", "zxc");
         addRandomData(7);
         Object o1 = myCashe.get(list.get(2));
         Object o2 = myCashe.get(list.get(0));

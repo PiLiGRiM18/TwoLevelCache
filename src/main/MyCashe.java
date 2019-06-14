@@ -7,10 +7,10 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,15 +18,13 @@ public class MyCashe extends LinkedHashMap {
     private static int CAPACITY;
     private static Logger LOGGER;
 
-    private Map<Object, Map<Integer, Path>> registry;
-//    private Map<Object, Integer> frequency;
+    private Map<Object, Map.Entry<Integer, Path>> registry;
 
     public MyCashe(int initialCapacity) {
         super(initialCapacity);
         LOGGER = Logger.getAnonymousLogger();
         CAPACITY = initialCapacity;
         registry = new HashMap<>();
-        frequency = new TreeMap<>();
     }
 
     @Override
@@ -41,10 +39,10 @@ public class MyCashe extends LinkedHashMap {
     @Override
     public Object put(Object key, Object value) {
         if (key != null) {
-            frequency.put(key, 0);
+            registry.put(key, new SimpleEntry<>(0, null));
             return super.put(key, value);
         }
-        frequency.put(value.hashCode(), 0);
+        registry.put(value.hashCode(), new SimpleEntry<>(0, null));
         return super.put(value.hashCode(), value);
     }
 
@@ -58,9 +56,8 @@ public class MyCashe extends LinkedHashMap {
             result = super.get(key);
         } else {
             try {
-                Path path = registry.get(key);
+                Path path = registry.get(key).getValue();
                 result = Files.readAllBytes(path);
-                registry.remove(key);
                 super.remove(key);
                 super.put(key, result);
                 Files.delete(path);
@@ -68,15 +65,22 @@ public class MyCashe extends LinkedHashMap {
                 LOGGER.log(Level.SEVERE, "Can't get file: " + key, e);
             }
         }
-        frequency.replace(key, frequency.get(key) + 1);
+        registry.replace(key, new SimpleEntry<>(registry.get(key).getKey() + 1, registry.get(key).getValue()));
         return result;
     }
 
     private boolean checkFrequency(Map.Entry eldest) {
+        registry.entrySet().stream().sorted(Comparator.comparing(o -> o.getValue().getKey()));
+//        ArrayList arrayList = (ArrayList) registry.entrySet().stream()
+//                .collect(Collectors.toMap(k -> (UUID) k.getKey(), e -> (Map.Entry<Integer, Path>) e.getValue()))
+//                .entrySet().stream()
+//                .collect(Collectors.toList());
+//
+//        arrayList.get(1);
         // TODO: 12.06.2019
-        frequency.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue());
+//        frequency.entrySet()
+//                .stream()
+//                .sorted(Map.Entry.comparingByValue());
         return true;
     }
 
@@ -91,8 +95,8 @@ public class MyCashe extends LinkedHashMap {
             // T ODO: 12.06.2019  https://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
             outputStream.write((byte[]) eldest.getValue());
             outputStream.flush();
+            registry.replace(eldest.getKey(), new SimpleEntry((registry.get(eldest.getKey())).getKey(), Paths.get(file.getAbsolutePath())));
             LOGGER.log(Level.INFO, "Dump on disk: " + file.getAbsolutePath());
-            registry.put(eldest.getKey(), Paths.get(file.getAbsolutePath()));
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Cant create file: " + eldest.getKey(), e);
         }
