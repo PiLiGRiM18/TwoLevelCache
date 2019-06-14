@@ -14,15 +14,15 @@ import java.util.stream.Collectors;
 @Logger
 public class MyCasheTest {
     private static java.util.logging.Logger LOGGER;
-
-    private final int CAPACITY = 5;
-    List<UUID> list = new ArrayList<>();
+    private final int CAPACITY = 3;
+    List IDList = new ArrayList<>();
     private HashMap myCashe;
 
     @Before
     public void setUp() throws Exception {
         LOGGER = java.util.logging.Logger.getAnonymousLogger();
         myCashe = new MyCashe(CAPACITY);
+        fillIDList(IDList, 3);
     }
 
     @After
@@ -38,27 +38,33 @@ public class MyCasheTest {
 
     @Test
     public void test() {
-//        myCashe.put("asd", "zxc");
-        addRandomData(7);
-        Object o1 = myCashe.get(list.get(2));
-        Object o2 = myCashe.get(list.get(0));
-        Object o3 = myCashe.get(list.get(6));
-        addRandomData(4);
-        Object o4 = myCashe.get(list.get(6));
-        Object o5 = myCashe.get(list.get(4));
+//        myCashe.put(1, "one");
+//        myCashe.put(2, "two");
+//        myCashe.put(3, "three");
+//        myCashe.put(4, "four");
+//        myCashe.put(5, "five");
+
+        fillCashe(myCashe);
+        Object o1 = myCashe.get(IDList.get(0));
+        Object o2 = myCashe.get(IDList.get(1));
+        Object o3 = myCashe.get(IDList.get(2));
+        fillCashe(myCashe);
 
 //String s = (String) myCashe.get("asd");
 
         System.out.printf("");
     }
 
-    private void addRandomData(int count) {
+    private void fillIDList(List list, int count) {
         for (int i = 0; i < count; i++) {
-            byte[] bytes = new byte[20];
-            new Random().nextBytes(bytes);
             UUID uuid = UUID.randomUUID();
             list.add(uuid);
-            myCashe.put(uuid, bytes);
         }
+    }
+
+    private void fillCashe(HashMap cashe) {
+        byte[] bytes = new byte[20];
+        new Random().nextBytes(bytes);
+        IDList.forEach(o -> cashe.put(o, bytes));
     }
 }
