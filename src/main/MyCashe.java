@@ -10,20 +10,23 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MyCashe extends LinkedHashMap {
     private static int CAPACITY;
+    private static Logger LOGGER;
 
-    private Map<Object, Path> registry = new HashMap<>();
-    private Map<Object, Integer> frequency = new HashMap<>();
-
-    private static Logger LOGGER = Logger.getAnonymousLogger();
+    private Map<Object, Map<Integer, Path>> registry;
+//    private Map<Object, Integer> frequency;
 
     public MyCashe(int initialCapacity) {
         super(initialCapacity);
+        LOGGER = Logger.getAnonymousLogger();
         CAPACITY = initialCapacity;
+        registry = new HashMap<>();
+        frequency = new TreeMap<>();
     }
 
     @Override
@@ -80,15 +83,15 @@ public class MyCashe extends LinkedHashMap {
     private void dump(Map.Entry eldest) {
         File file = null;
         try {
-            file = File.createTempFile("MyCashe_" + eldest.getKey(), "_temp");
+            file = File.createTempFile("my-cashe." + eldest.getKey(), ".tmp");
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Can't create temp file: MyCashe_" + eldest.getKey() + "_temp", e);
+            LOGGER.log(Level.SEVERE, "Can't create temp file: my-cashe." + eldest.getKey() + ".tmp", e);
         }
         try (OutputStream outputStream = new FileOutputStream(file)) {
             // T ODO: 12.06.2019  https://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
             outputStream.write((byte[]) eldest.getValue());
             outputStream.flush();
-            LOGGER.log(Level.INFO, "The file has been dumped on disk: " + file.getAbsolutePath());
+            LOGGER.log(Level.INFO, "Dump on disk: " + file.getAbsolutePath());
             registry.put(eldest.getKey(), Paths.get(file.getAbsolutePath()));
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Cant create file: " + eldest.getKey(), e);
