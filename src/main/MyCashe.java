@@ -7,93 +7,84 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class MyCashe extends LinkedHashMap {
-    private static int CAPACITY;
-    private static Logger LOGGER;
 
-    private Map<Object, Map.Entry<Integer, Path>> registry;
+    private static int MAX_SIZE;
+    private static Logger LOG;
 
-    public MyCashe(int initialCapacity) {
-        super(initialCapacity);
-        LOGGER = Logger.getAnonymousLogger();
-        CAPACITY = initialCapacity;
+    private Map<Object, Path> registry;
+
+    public MyCashe(int initialCapacity, boolean accessOrder) {
+        super(initialCapacity, 0.75f, accessOrder);
+        LOG = Logger.getAnonymousLogger();
+        MAX_SIZE = initialCapacity;
         registry = new HashMap<>();
     }
 
     @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
-        if (size() >= CAPACITY && canBeDumped(eldest)) {
-            if (canBeDumped(eldest)) {
-                dump(eldest);
-                return size() >= CAPACITY;
-            }
+        if (size() > MAX_SIZE) {
+            dump(eldest);
+            return size() > MAX_SIZE;
         }
         return super.removeEldestEntry(eldest);
     }
 
     @Override
     public Object put(Object key, Object value) {
-        if (key != null) {
-            registry.put(key, new SimpleEntry<>(0, null));
-            return super.put(key, value);
-        }
-        registry.put(value.hashCode(), new SimpleEntry<>(0, null));
-        return super.put(value.hashCode(), value);
+        if (key == null) key = value.hashCode();
+        registry.put(key, null);
+        return super.put(key, value);
     }
 
     @Override
     public Object get(Object key) {
         Object result = null;
-        if (!registry.keySet().contains(key)) {
-            LOGGER.log(Level.SEVERE, String.format("There is no key %s in the cache!", key));
+        if (!registry.keySet().contains(key))
+            LOG.log(Level.SEVERE, String.format("There is no key %s in the cache!", key));
+        if (super.containsKey(key)) result = super.get(key);
+        else try {
+            Path path = registry.get(key);
+            result = Files.readAllBytes(path);
+            super.put(key, result);
+            Files.delete(path);
+            registry.replace(key, null);
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, "Can't get file: " + key, e);
         }
-        if (containsKey(key)) {
-            result = super.get(key);
-        } else {
-            try {
-                Path path = registry.get(key).getValue();
-                result = Files.readAllBytes(path);
-                super.remove(key);
-                super.put(key, result);
-                Files.delete(path);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Can't get file: " + key, e);
-            }
-        }
-        registry.replace(key, new SimpleEntry<>(registry.get(key).getKey() + 1, registry.get(key).getValue()));
         return result;
     }
 
-    private boolean canBeDumped(Map.Entry eldest) {
-        List<Integer> list = registry.values().stream().map(v -> v.getKey())
-                .collect(Collectors.toList())
-                .stream().sorted(Comparator.reverseOrder())
-                .collect(Collectors.toList());
-        return registry.size() < CAPACITY && (registry.get(eldest.getKey())).getKey() <= list.get(CAPACITY);
-    }
+//    private boolean canBeDumped(Map.Entry eldest) {
+//        List<Integer> list = registry.values().stream().map(v -> v.getKey())
+//                .collect(Collectors.toList())
+//                .stream().sorted(Comparator.reverseOrder())
+//                .collect(Collectors.toList());
+//        return registry.size() < MAX_SIZE && (registry.get(eldest.getKey())).getKey() <= list.get(MAX_SIZE);
+//    }
 
     private void dump(Map.Entry eldest) {
         File file = null;
         try {
             file = File.createTempFile("my-cashe." + eldest.getKey(), ".tmp");
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Can't create temp file: my-cashe." + eldest.getKey() + ".tmp", e);
+            LOG.log(Level.SEVERE, "Can't create temp file: my-cashe." + eldest.getKey() + ".tmp", e);
         }
         try (OutputStream outputStream = new FileOutputStream(file)) {
             // TODO: 12.06.2019  https://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
             outputStream.write((byte[]) eldest.getValue());
             outputStream.flush();
-            registry.replace(eldest.getKey(), new SimpleEntry((registry.get(eldest.getKey())).getKey(), Paths.get(file.getAbsolutePath())));
-            LOGGER.log(Level.INFO, "Dump on disk: " + file.getAbsolutePath());
+            registry.replace(eldest.getKey(), Paths.get(file.getAbsolutePath()));
+            LOG.log(Level.INFO, "Dumped on disk: " + file.getAbsolutePath());
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Cant create file: " + eldest.getKey(), e);
+            LOG.log(Level.SEVERE, "Cant create file: " + eldest.getKey(), e);
         }
         remove(eldest.getKey());
     }
 }
-//
