@@ -21,7 +21,7 @@ public class MyCashe extends LinkedHashMap {
     private Map<Object, Path> registry;
 
     public MyCashe(int initialCapacity, boolean accessOrder) {
-        super(initialCapacity, 0.75f, accessOrder);
+        super(initialCapacity, .75f, accessOrder);
         LOG = Logger.getAnonymousLogger();
         MAX_SIZE = initialCapacity;
         registry = new HashMap<>();
@@ -60,14 +60,6 @@ public class MyCashe extends LinkedHashMap {
         }
         return result;
     }
-
-//    private boolean canBeDumped(Map.Entry eldest) {
-//        List<Integer> list = registry.values().stream().map(v -> v.getKey())
-//                .collect(Collectors.toList())
-//                .stream().sorted(Comparator.reverseOrder())
-//                .collect(Collectors.toList());
-//        return registry.size() < MAX_SIZE && (registry.get(eldest.getKey())).getKey() <= list.get(MAX_SIZE);
-//    }
 
     private void dump(Map.Entry eldest) {
         File file = null;

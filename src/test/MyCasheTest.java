@@ -25,7 +25,7 @@ public class MyCasheTest {
 
     @Before
     public void setUp() throws Exception {
-        myCashe = new MyCashe(CAPACITY, true);
+        myCashe = new MyCashe(CAPACITY, false);
     }
 
     @After
@@ -35,15 +35,17 @@ public class MyCasheTest {
 
     @Test
     public void test() {
-        fillCashe(myCashe, 10);
+        fillCashe(myCashe, 0, 10);
         System.out.println(myCashe.toString());
+        fillCashe(myCashe, 11, 10);
     }
 
-    private void fillCashe(HashMap cashe, int count) {
-        for (int i = 0; i < count; i++) {
+    private void fillCashe(HashMap cashe, int start, int count) {
+        for (int i = start; i < count + start; i++) {
             byte[] bytes = new byte[20];
             new Random().nextBytes(bytes);
-            cashe.put(null, bytes);
+            cashe.put(i, bytes);
+            myCashe.get(0);
         }
     }
 
