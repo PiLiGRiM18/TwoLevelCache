@@ -19,12 +19,13 @@ import static java.util.logging.Logger.getAnonymousLogger;
 public class MyCasheTest {
 
     private static java.util.logging.Logger LOGGER = getAnonymousLogger();
-    private HashMap myCashe;
+    private MyCashe<Integer, String> myCashe;
 
-    private final int CAPACITY = 3;
+    private final int CAPACITY = 10;
 
     @Before
     public void setUp() throws Exception {
+        cleanTempDirectory();
         myCashe = new MyCashe(CAPACITY, false);
     }
 
@@ -35,17 +36,17 @@ public class MyCasheTest {
 
     @Test
     public void test() {
-        fillCashe(myCashe, 0, 10);
+        fillCashe(myCashe, 10);
         System.out.println(myCashe.toString());
-        fillCashe(myCashe, 11, 10);
+        fillCashe(myCashe, 10);
     }
 
-    private void fillCashe(HashMap cashe, int start, int count) {
-        for (int i = start; i < count + start; i++) {
+    private void fillCashe(MyCashe cashe, int count) {
+        for (int i = 0; i < count; i++) {
             byte[] bytes = new byte[20];
             new Random().nextBytes(bytes);
-            cashe.put(i, bytes);
-            myCashe.get(0);
+            cashe.put(bytes);
+//            myCashe.get(0);
         }
     }
 
