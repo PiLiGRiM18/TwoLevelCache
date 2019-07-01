@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/TwoLevelCashe.iml" filepath="$PROJECT_DIR$/TwoLevelCashe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/TwoLevelCache.iml" filepath="$PROJECT_DIR$/TwoLevelCache.iml" />
     </modules>
   </component>
 </project>

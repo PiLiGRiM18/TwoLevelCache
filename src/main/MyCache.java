@@ -11,14 +11,14 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MyCashe<K, V extends Serializable> extends LinkedHashMap<K, V> {
+public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
 
     private static int MAX_SIZE;
     private static Logger LOG;
 
     private Map<K, Path> registry;
 
-    public MyCashe(int initialCapacity, boolean accessOrder) {
+    public MyCache(int initialCapacity, boolean accessOrder) {
         super(initialCapacity, .75f, accessOrder);
         LOG = Logger.getAnonymousLogger();
         MAX_SIZE = initialCapacity;
@@ -67,9 +67,9 @@ public class MyCashe<K, V extends Serializable> extends LinkedHashMap<K, V> {
     private void dump(Map.Entry eldest) {
         File file = null;
         try {
-            file = File.createTempFile("my-cashe." + eldest.getKey(), ".tmp");
+            file = File.createTempFile("my-cache." + eldest.getKey(), ".tmp");
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Can't create temp file: my-cashe." + eldest.getKey() + ".tmp", e);
+            LOG.log(Level.SEVERE, "Can't create temp file: my-cache." + eldest.getKey() + ".tmp", e);
         }
         try (OutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write((byte[]) eldest.getValue());
@@ -84,7 +84,7 @@ public class MyCashe<K, V extends Serializable> extends LinkedHashMap<K, V> {
 
     @Override
     public String toString() {
-        return "MyCashe{" +
+        return "MyCache{" +
                 "registry=\n" + registry.toString().replace(",", "\n") +
                 '}';
     }
