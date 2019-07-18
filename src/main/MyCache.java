@@ -11,6 +11,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * kj
+ * da
+ */
 public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
 
     private static int MAX_SIZE;
@@ -59,7 +63,7 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
             Files.delete(path);
             registry.replace((K) key, null);
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Can't get file: " + key, e);
+            LOG.log(Level.SEVERE, "Can't get file. Key: " + key, e);
         }
         return result;
     }
@@ -69,15 +73,15 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
         try {
             file = File.createTempFile("my-cache." + eldest.getKey(), ".tmp");
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Can't create temp file: my-cache." + eldest.getKey() + ".tmp", e);
+            LOG.log(Level.SEVERE, "Can't create temp file: my-cache." + eldest.getKey() + ".tmp\n", e);
         }
         try (OutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write((byte[]) eldest.getValue());
             outputStream.flush();
             registry.replace((K) eldest.getKey(), Paths.get(file.getAbsolutePath()));
-            LOG.log(Level.INFO, "Dumped on disk: " + file.getAbsolutePath());
+            LOG.log(Level.INFO, "File is dumped on disk. \nKey: " + eldest.getKey() + "\nPath: " + file.getAbsolutePath() + "\n");
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Cant create file: " + eldest.getKey(), e);
+            LOG.log(Level.SEVERE, "Cant create file. Key: " + eldest.getKey() + "\n", e);
         }
         remove(eldest.getKey());
     }
@@ -86,6 +90,7 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
     public String toString() {
         return "MyCache{" +
                 "registry=\n" + registry.toString().replace(",", "\n") +
-                '}';
+                "}" +
+                "\nCache size: " + registry.keySet().size();
     }
 }
