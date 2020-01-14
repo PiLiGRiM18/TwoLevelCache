@@ -88,8 +88,8 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
 
     @Override
     public String toString() {
-        return "MyCache{" +
-                "registry=\n" + registry.toString().replace(",", "\n") +
+        return this.getClass().getSimpleName()+ "{" +
+                "registry=\n" + registry.toString().replace(",", ",\n") +
                 "}" +
                 "\nCache size: " + registry.keySet().size();
     }

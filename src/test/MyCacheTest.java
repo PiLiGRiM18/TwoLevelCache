@@ -17,8 +17,9 @@ import static java.util.logging.Logger.getAnonymousLogger;
 
 public class MyCacheTest {
 
-    private static java.util.logging.Logger LOG = getAnonymousLogger();
+    private static java.util.logging.Logger log = getAnonymousLogger();
     private final int CAPACITY = 10;
+    private final int COUNT_OF_ELEMENTS = 20;
     private MyCache<UUID, String> myCache;
 
     @Before
@@ -34,7 +35,7 @@ public class MyCacheTest {
 
     @Test
     public void test() {
-        fillCache(myCache, CAPACITY);
+        fillCache(myCache, COUNT_OF_ELEMENTS);
 
     }
 
@@ -49,7 +50,7 @@ public class MyCacheTest {
     private void putFileInCache(MyCache cache, Object file) {
         UUID key = UUID.randomUUID();
         cache.put(key, (Serializable) file);
-        LOG.log(Level.SEVERE, "Put the file in cache. \nKey: " + key + " \n");
+        log.log(Level.SEVERE, "Put the file in cache. \nKey: " + key + " \n");
         System.out.println(cache.toString());
     }
 
