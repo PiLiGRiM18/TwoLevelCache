@@ -1,6 +1,5 @@
 package test;
 
-import jdk.nashorn.internal.runtime.logging.Logger;
 import main.MyCache;
 import org.junit.After;
 import org.junit.Before;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 
 import static java.util.logging.Logger.getAnonymousLogger;
 
-@Logger
 public class MyCacheTest {
 
     private static java.util.logging.Logger LOG = getAnonymousLogger();
