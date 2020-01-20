@@ -12,8 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * kj
- * da
+ * Cache core
  */
 public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
 
@@ -22,6 +21,10 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
 
     private Map<K, Path> registry;
 
+    /**
+     * @param initialCapacity
+     * @param accessOrder
+     */
     public MyCache(int initialCapacity, boolean accessOrder) {
         super(initialCapacity, .75f, accessOrder);
         LOG = Logger.getAnonymousLogger();
@@ -29,6 +32,10 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
         registry = new HashMap<>();
     }
 
+    /**
+     * @param eldest
+     * @return
+     */
     @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
         if (size() > MAX_SIZE) {
@@ -38,6 +45,11 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
         return super.removeEldestEntry(eldest);
     }
 
+    /**
+     * @param key
+     * @param value
+     * @return
+     */
     @Override
     public V put(K key, V value) {
         registry.put(key, null);
@@ -50,6 +62,10 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
         return super.put(key, value);
     }
 
+    /**
+     * @param key
+     * @return
+     */
     @Override
     public V get(Object key) {
         V result = null;
@@ -68,6 +84,9 @@ public class MyCache<K, V extends Serializable> extends LinkedHashMap<K, V> {
         return result;
     }
 
+    /**
+     * @param eldest
+     */
     private void dump(Map.Entry eldest) {
         File file = null;
         try {
